@@ -4,30 +4,34 @@ Last updated: 2026-04-22 by Claude
 ---
 
 ## Current Status
-**Phase:** Setup — App frameworks bootstrapped
+**Phase:** Setup — Local identity infrastructure defined
 **Last worked on:** 2026-04-22
 **Overall health:** On track
 
-Monorepo fully scaffolded and app frameworks installed. Expo (custom dev client) bootstrapped
-in `apps/mobile/`, Next.js 15 (App Router) bootstrapped in `apps/coach-web/` and
-`apps/admin-web/`. Shared ESLint flat config and Prettier config live in `packages/config/`.
-`turbo run lint` and `turbo run format` both pass cleanly across all 22 workspaces.
-All architectural decisions are now closed — ready for Identity service + Keycloak work
-(requires explicit approval before any auth or RBAC changes).
+Monorepo scaffolded, app frameworks bootstrapped, and local Keycloak infrastructure created.
+Docker Compose stack (`infra/local/`) starts Keycloak 26.2 + a dedicated Postgres on port 5433.
+`bbc` realm defined in `infra/keycloak/bbc-realm.json` with 3 roles and 2 confidential OIDC
+clients. Node upgraded to 22.13.0 (via nvm); `eslint-visitor-keys` override removed; all 22
+workspaces still pass `turbo run lint`. Docker Desktop is not yet installed — smoke test
+pending. All auth/RBAC decisions are closed; next session implements identity service code.
 
 ---
 
 ## Resume Here (Next Session Starts At)
 
-- **Next task:** Identity service + Keycloak setup. This requires explicit approval before
-  implementation — do not begin auth or RBAC changes without confirming scope.
-- **Branch:** create `setup/identity` from `master` (merge `setup/app-frameworks` first)
+- **Next task:** Identity service code — Hono app skeleton, JWT middleware (Keycloak public key
+  fetch + RS256 verify), role-extraction middleware, Zod schemas for token claims, Supabase
+  migration for `profiles` table (keyed on Keycloak `sub`), BFF wiring.
+- **Branch:** `setup/identity` (already created from master)
 - **Relevant files:**
-  - `services/identity/` — service stub, ready for runtime code
+  - `services/identity/` — service stub, ready for Hono runtime code
   - `services/mobile-bff/` — Hono (decided); wires to identity for token validation
   - `services/coach-bff/` — Hono (decided); wires to identity for token validation
+  - `infra/local/docker-compose.yml` — start Keycloak locally before testing auth flows
+  - `infra/keycloak/bbc-realm.json` — realm config, client IDs, token lifespans
   - `ARCHITECTURE.md` — auth flow design, role matrix, RBAC model
-- **Before starting:** both Keycloak deployment and identity source of truth decisions are closed (see Decisions Log).
+- **Before starting:** Install Docker Desktop (not yet installed) to run the Keycloak stack locally.
+- **Prerequisite:** Auth changes require explicit approval — confirmed in scope for this branch.
 
 ---
 
@@ -64,18 +68,20 @@ Dated record of what was decided and why. Never delete entries — only add new 
 - **2026-04-21 Expo Go incompatibility:** Native modules (HealthKit, Health Connect,
   media pipeline) require Expo prebuild / custom dev client. Expo Go will not work for
   this project. Always start dev with `npx expo start --dev-client`.
-- **2026-04-22 eslint-visitor-keys Node version floor:** `eslint-visitor-keys@5.x`
-  requires Node `^20.19.0 || ^22.13.0 || >=24`. Local Node is 22.11.0. Worked around
-  via `pnpm.overrides` pinning `eslint-visitor-keys` to `^4.2.0`. CI must use
-  Node >= 22.13.0 when this override is eventually removed.
+- **2026-04-22 eslint-visitor-keys Node version floor (RESOLVED):** `eslint-visitor-keys@5.x`
+  requires Node `^22.13.0`. Local Node upgraded to 22.13.0 via nvm (macOS 12 blocked
+  Homebrew build for `node@22`). `pnpm.overrides` pin removed; all 22 workspaces pass lint.
+- **2026-04-22 macOS 12 + Homebrew:** macOS 12 is Homebrew Tier 3 — `simdutf` fails to
+  compile for `node@22`. Use nvm (pre-built binaries) for Node version management on this
+  machine. Do not attempt `brew install node@22`.
 
 ---
 
 ## Current Tech Debt
 
-- **2026-04-22 Node version mismatch:** Local dev is on Node 22.11.0; `eslint-visitor-keys@5.x`
-  requires `^22.13.0`. Pinned to 4.x via pnpm override as a temporary workaround.
-  Must upgrade local Node to ≥ 22.13.0 and remove the override before CI goes live.
+- **2026-04-22 Docker Desktop not installed:** Keycloak Docker Compose stack is defined and
+  correct, but cannot be smoke-tested until Docker Desktop is installed. Install before
+  beginning identity service work so auth flows can be tested locally.
 - **2026-04-22 No ESLint or Prettier config yet (RESOLVED):** Shared configs now live
   in `packages/config/`. All 22 workspaces pass `turbo run lint` and `turbo run format`.
 - **2026-04-22 pnpm engine-strict (RESOLVED):** `.npmrc` has `engine-strict=true`;
@@ -107,6 +113,14 @@ Dated record of what was decided and why. Never delete entries — only add new 
   `"prettier": "@bbc/config/prettier"` in package.json, format + lint scripts
 - 2026-04-22 ✅ `turbo run lint` — 22/22 workspaces pass; actually checks files
 - 2026-04-22 ✅ `turbo run format` — 22/22 workspaces pass; Prettier runs across all
+- 2026-04-22 ✅ Node upgraded to 22.13.0 via nvm (macOS 12; Homebrew `node@22` blocked by simdutf compile failure)
+- 2026-04-22 ✅ `eslint-visitor-keys` pnpm override removed; `turbo run lint` still 22/22 clean
+- 2026-04-22 ✅ `setup/app-frameworks` merged into `master`; `setup/identity` branch created
+- 2026-04-22 ✅ `infra/local/docker-compose.yml` — Keycloak 26.2 + Postgres on 5433, health checks, realm import mount
+- 2026-04-22 ✅ `infra/keycloak/bbc-realm.json` — bbc realm, roles: coach/client/admin, clients: mobile-bff + coach-bff (confidential, PKCE S256), access token 900s, refresh 604800s
+- 2026-04-22 ✅ `infra/local/.env.example` — all required keys documented
+- 2026-04-22 ✅ `infra/local/README.md` — startup command, force-reimport steps, client secret rotation note
+- 2026-04-22 ⏳ Keycloak smoke test pending — Docker Desktop not installed
 
 ---
 
@@ -118,10 +132,12 @@ Dated record of what was decided and why. Never delete entries — only add new 
 - [x] Bootstrap Next.js in `apps/coach-web/` and `apps/admin-web/`
 - [x] Set up shared ESLint + Prettier configs in `packages/config/`
 - [x] Add `.npmrc` with `engine-strict=true` and pnpm engine constraint
-- [ ] Upgrade local Node to >= 22.13.0 and remove pnpm eslint-visitor-keys override
+- [x] Upgrade local Node to >= 22.13.0 and remove pnpm eslint-visitor-keys override
 
 **Phase 1 — MVP**
-- [ ] Identity service + Keycloak setup (requires explicit approval before auth/RBAC work)
+- [ ] Install Docker Desktop (prerequisite for local Keycloak smoke test and dev auth flows)
+- [ ] Smoke test `docker compose up` in `infra/local/` — confirm Keycloak at localhost:8080, bbc realm imported
+- [ ] Identity service + Keycloak setup (approved; branch: setup/identity)
 - [ ] Auth flow in mobile app (login, session, consent)
 - [ ] Training service — exercise library, workout/program builder
 - [ ] Workout player with timed engine
@@ -163,3 +179,9 @@ Dated record of what was decided and why. Never delete entries — only add new 
   Two architectural decisions closed (event bus = Supabase Realtime, BFF = Hono).
   Node version mismatch (22.11.0 vs required ≥22.13.0) worked around via pnpm override —
   must fix before CI. Next: Identity service + Keycloak (needs explicit approval).
+- 2026-04-22 (session 3): Local identity infrastructure. Two decisions closed (Keycloak
+  deployment = Docker Compose local / managed staging+prod; identity SoT = Keycloak, not
+  Supabase Auth). setup/app-frameworks merged to master; setup/identity branch created.
+  Node upgraded to 22.13.0 via nvm (macOS 12 blocked brew); eslint-visitor-keys override
+  removed; lint still 22/22 clean. Docker Compose stack + bbc realm JSON written.
+  Smoke test blocked: Docker Desktop not installed — install before next session.

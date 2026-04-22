@@ -1,0 +1,156 @@
+{
+  "id": "bbc",
+  "realm": "bbc",
+  "displayName": "Body By Carisma",
+  "enabled": true,
+
+  "accessTokenLifespan": 900,
+  "ssoSessionMaxLifespan": 604800,
+  "ssoSessionIdleTimeout": 604800,
+  "offlineSessionMaxLifespan": 604800,
+  "offlineSessionMaxLifespanEnabled": true,
+  "revokeRefreshToken": true,
+  "refreshTokenMaxReuse": 0,
+
+  "bruteForceProtected": true,
+  "permanentLockout": false,
+  "maxFailureWaitSeconds": 900,
+  "minimumQuickLoginWaitSeconds": 60,
+  "waitIncrementSeconds": 60,
+  "quickLoginCheckMilliSeconds": 1000,
+  "maxDeltaTimeSeconds": 43200,
+  "failureFactor": 5,
+
+  "defaultRole": {
+    "id": "client",
+    "name": "client",
+    "description": "Default role assigned to new users",
+    "composite": false,
+    "clientRole": false,
+    "containerId": "bbc"
+  },
+
+  "roles": {
+    "realm": [
+      {
+        "name": "coach",
+        "description": "Coaching staff — can create programs, review clients, message, and manage nutrition plans",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "bbc"
+      },
+      {
+        "name": "client",
+        "description": "App client / end user",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "bbc"
+      },
+      {
+        "name": "admin",
+        "description": "Platform administrator — full access to business metrics, user management, and configuration",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "bbc"
+      }
+    ]
+  },
+
+  "clients": [
+    {
+      "clientId": "mobile-bff",
+      "name": "Mobile BFF",
+      "description": "Backend-for-frontend for the React Native mobile app",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "authorizationServicesEnabled": false,
+      "secret": "dev-mobile-bff-secret",
+      "redirectUris": ["com.bodybycarisma.mobile://*"],
+      "webOrigins": ["+"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "access.token.signed.response.alg": "RS256"
+      },
+      "protocolMappers": [
+        {
+          "name": "realm-roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "foo",
+            "access.token.claim": "true",
+            "claim.name": "roles",
+            "jsonType.label": "String",
+            "multivalued": "true"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "coach-bff",
+      "name": "Coach BFF",
+      "description": "Backend-for-frontend for the coach web application",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "authorizationServicesEnabled": false,
+      "secret": "dev-coach-bff-secret",
+      "redirectUris": [
+        "http://localhost:3001/*",
+        "http://localhost:3000/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3001",
+        "http://localhost:3000"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "access.token.signed.response.alg": "RS256"
+      },
+      "protocolMappers": [
+        {
+          "name": "realm-roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "foo",
+            "access.token.claim": "true",
+            "claim.name": "roles",
+            "jsonType.label": "String",
+            "multivalued": "true"
+          }
+        }
+      ]
+    }
+  ],
+
+  "scopeMappings": [],
+  "clientScopeMappings": {},
+
+  "userManagedAccessAllowed": false,
+  "internationalizationEnabled": false,
+  "supportedLocales": [],
+  "defaultLocale": "en",
+
+  "registrationAllowed": false,
+  "registrationEmailAsUsername": true,
+  "rememberMe": false,
+  "verifyEmail": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+
+  "sslRequired": "external"
+}

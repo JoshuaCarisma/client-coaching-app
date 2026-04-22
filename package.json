@@ -21,9 +21,5 @@
     "eslint": "^9.0.0",
     "typescript-eslint": "^8.0.0"
   },
-  "pnpm": {
-    "overrides": {
-      "eslint-visitor-keys": "^4.2.0"
-    }
-  }
+  "pnpm": {}
 }

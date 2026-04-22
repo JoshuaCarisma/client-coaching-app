@@ -19,6 +19,7 @@ ios/
 .env
 .env.local
 .env.*.local
+infra/local/.env
 
 # Editor
 .DS_Store
