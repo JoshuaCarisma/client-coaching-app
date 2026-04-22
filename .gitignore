@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+
+# Turbo
+.turbo/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Expo
+.expo/
+android/
+ios/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Editor
+.DS_Store
+*.pem
+
+# Testing
+coverage/
+
+# pnpm
+.pnpm-store/
+
+# TypeScript
+*.tsbuildinfo
