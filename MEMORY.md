@@ -1,28 +1,39 @@
 # Memory: Body By Carisma — Client Coaching Platform
-Last updated: 2026-04-21 by Claude
+Last updated: 2026-04-22 by Claude
 
 ---
 
 ## Current Status
-**Phase:** Setup
-**Last worked on:** 2026-04-21
-**Overall health:** Needs decision
+**Phase:** Setup — Monorepo scaffolded
+**Last worked on:** 2026-04-22
+**Overall health:** On track
 
-GitHub repo initialized and documentation committed. Monorepo folder structure not yet 
-scaffolded. Four architectural decisions remain open before service wiring can begin.
+Monorepo fully scaffolded with Turborepo + pnpm workspaces. All 23 workspace projects
+resolve cleanly (`pnpm install` confirmed). Two architectural decisions remain open
+(event bus technology, BFF implementation technology) before service wiring can begin.
+No app frameworks installed yet — structure only.
 
 ---
 
 ## Resume Here (Next Session Starts At)
 
-- **Next task:** Scaffold the monorepo folder structure per ARCHITECTURE.md — create 
-  `apps/`, `services/`, `packages/`, `infra/`, `docs/` at root, then stub all 
-  subdirectories including `apps/mobile/features/`, `apps/coach-web/`, `apps/admin-web/`, 
-  all 9 service directories, and all 6 package directories
-- **Branch:** `setup/monorepo-scaffold` (create from master)
-- **Relevant files:** `ARCHITECTURE.md` (Folder Map section is the spec), `CLAUDE.md`
-- **Known issue to handle first:** Four open decisions must be resolved before any 
-  service code is written — see Decisions Log for pending items
+- **Next task:** Bootstrap app frameworks into the scaffolded stubs — Expo (custom dev
+  client) for `apps/mobile/`, Next.js for `apps/coach-web/` and `apps/admin-web/`.
+  Then set up shared ESLint + Prettier config in `packages/config/` that all workspaces
+  extend.
+- **Branch:** `setup/app-frameworks` (create from master)
+- **Relevant files:**
+  - `apps/mobile/package.json` — Expo goes here; do NOT use Expo Go
+  - `apps/coach-web/package.json` — Next.js goes here
+  - `apps/admin-web/package.json` — Next.js goes here
+  - `packages/config/package.json` — shared ESLint + Prettier config lands here
+  - `tsconfig.base.json` — root; individual apps extend this
+  - `CLAUDE.md` — `npx expo start --dev-client` is the mobile dev command
+- **Decide before proceeding:**
+  - Event bus technology (SQS vs Kafka vs Supabase Realtime) — needed before any
+    service emits production events
+  - BFF implementation (Express/Fastify/Hono) — needed before mobile-bff and coach-bff
+    have any runtime code
 
 ---
 
@@ -38,10 +49,11 @@ Dated record of what was decided and why. Never delete entries — only add new 
 | 2026-04-21 | Calendar service as cross-domain orchestration layer | Training and nutrition expose definitions; calendar sequences them into daily plans | Calendar becomes critical-path service; cross-service schema coordination required |
 | 2026-04-21 | React Native + Expo prebuild (not Expo Go) | Native modules required for HealthKit, Health Connect, and media pipeline | Cannot use Expo Go; custom dev client required for all development |
 | 2026-04-21 | Health Connect for Android (not Google Fit) | Google Fit APIs deprecated in 2026; Health Connect is the current Android standard | Legacy Android users on older OS versions may have limited Health Connect support |
+| 2026-04-22 | Turborepo for monorepo build orchestration | Faster task graph execution, first-class pnpm support, simpler config than Nx for this project size | Nx has more plugins; Turborepo is the leaner choice given we own all service boundaries |
+| 2026-04-22 | BFF pattern chosen: two gateways (mobile-bff, coach-bff) | Mobile and coach surfaces have different aggregation needs; one gateway would become a catch-all | Implementation technology (Express/Fastify/Hono) still pending |
+| 2026-04-22 | services/video scaffolded as Phase 2 stub only | LiveKit integration is out of scope for MVP; reserved with README to avoid accidental feature creep | Full live-class and async recorded coaching features will require scoping session |
 | ⏳ PENDING | Event bus technology | Need to decide before any service emits production events | Options: SQS, Kafka, Supabase Realtime, other |
-| ⏳ PENDING | API gateway implementation | Need to decide before multi-service wiring begins | Options: custom Express/Fastify BFF, AWS API Gateway, Kong |
-| ⏳ PENDING | Monorepo tooling | Should be chosen before repo grows and build times become painful | Options: Turborepo vs Nx |
-| ⏳ PENDING | Video service folder structure | services/video not yet scaffolded | Decide when LiveKit integration begins |
+| ⏳ PENDING | BFF implementation technology | express/Fastify/Hono — need to decide before mobile-bff and coach-bff have runtime code | Affects request middleware patterns and worker deployment model |
 
 ---
 
@@ -61,7 +73,12 @@ Dated record of what was decided and why. Never delete entries — only add new 
 
 ## Current Tech Debt
 
-Nothing yet — no code written.
+- **2026-04-22 pnpm version pinned to 9.15.4 in package.json but not enforced via
+  `.npmrc`** — should add `engine-strict=true` and `engines.pnpm` field when setting
+  up shared config in `packages/config/`. Low risk now; will matter when CI comes online.
+- **2026-04-22 No ESLint or Prettier config yet** — `turbo run lint` and `turbo run
+  format` tasks exist but no actual config files. Must be created before any real code
+  goes in, otherwise lint runs silently succeed without checking anything.
 
 ---
 
@@ -72,18 +89,33 @@ Nothing yet — no code written.
 - 2026-04-21 ✅ GitHub repo initialized — `JoshuaCarisma/client-coaching-app`, public
 - 2026-04-21 ✅ .claude/ setup — agents (code-reviewer, planner, security-reviewer), 
   commands (wrap-up), hooks (block-dangerous.sh), owasp-security skill
+- 2026-04-22 ✅ pnpm-workspace.yaml — workspace roots: `apps/*`, `services/*`, `packages/*`
+- 2026-04-22 ✅ turbo.json — Turborepo task graph: `build`, `dev`, `test`, `lint` with
+  correct dependency and output config
+- 2026-04-22 ✅ root package.json — monorepo root `bbc-platform`, turbo + typescript +
+  prettier as devDeps; 23 workspace projects resolve cleanly via `pnpm install`
+- 2026-04-22 ✅ tsconfig.base.json — strict TypeScript base config at root (all packages
+  will extend this)
+- 2026-04-22 ✅ apps/ scaffolded — `mobile`, `coach-web`, `admin-web`, `marketing-site`
+  each with package.json stubs and `features/.gitkeep`
+- 2026-04-22 ✅ services/ scaffolded — 12 services: `identity`, `calendar`, `training`,
+  `nutrition`, `journaling`, `analytics`, `messaging`, `notifications`, `ingestion`,
+  `video` (Phase 2 stub), `mobile-bff`, `coach-bff` — each with package.json + README.md
+  describing ownership and boundaries
+- 2026-04-22 ✅ packages/ scaffolded — `ui`, `schemas`, `types`, `api-client`,
+  `health-sync`, `config` — each with package.json stub
+- 2026-04-22 ✅ infra/ and docs/ directories created with `.gitkeep`
 
 ---
 
 ## What's Left to Build
 
 **Setup**
-- [ ] Resolve 4 pending architectural decisions (event bus, API gateway, monorepo tooling, video service)
-- [ ] Scaffold monorepo folder structure per ARCHITECTURE.md
-- [ ] Configure Turborepo or Nx (once tooling decision is made)
-- [ ] Set up shared tsconfig, eslint, prettier configs in packages/config
-- [ ] Initialize Expo mobile app in apps/mobile
-- [ ] Add MEMORY.md to repo
+- [ ] Resolve 2 remaining decisions (event bus technology, BFF implementation technology)
+- [ ] Bootstrap Expo (custom dev client) in `apps/mobile/`
+- [ ] Bootstrap Next.js in `apps/coach-web/` and `apps/admin-web/`
+- [ ] Set up shared ESLint + Prettier configs in `packages/config/`
+- [ ] Add `.npmrc` with `engine-strict=true` and pnpm engine constraint
 
 **Phase 1 — MVP**
 - [ ] Identity service + Keycloak setup
@@ -119,3 +151,7 @@ Nothing yet — no code written.
 - 2026-04-21: Project scoped and documented. CLAUDE.md, ARCHITECTURE.md generated and 
   committed. GitHub repo live. Monorepo scaffold is next. Four architectural decisions 
   remain open (event bus, API gateway, monorepo tooling, video service structure).
+- 2026-04-22: Monorepo scaffolded. Turborepo + pnpm workspaces configured. 23 workspace
+  projects (4 apps, 12 services, 6 packages, root) resolve cleanly. All service READMEs
+  written with ownership descriptions. Two decisions still open (event bus, BFF tech).
+  Next: bootstrap app frameworks and shared lint/prettier config.
