@@ -35,10 +35,11 @@ services:
       keycloak-db:
         condition: service_healthy
     healthcheck:
+      # Keycloak 26.x has no curl/wget; health endpoint is on management port 9000
       test:
         [
           "CMD-SHELL",
-          "curl -sf http://localhost:8080/health/ready || exit 1",
+          "exec 3<>/dev/tcp/localhost/9000 && echo -e 'GET /health/ready HTTP/1.0\\r\\nHost: localhost\\r\\n\\r\\n' >&3 && grep -q '\"UP\"' <&3 || exit 1",
         ]
       interval: 30s
       timeout: 10s
