@@ -1,0 +1,11 @@
+{
+  "name": "@bbc/mobile",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "expo start --dev-client",
+    "build": "expo export",
+    "test": "jest",
+    "lint": "eslint . --ext .ts,.tsx"
+  }
+}

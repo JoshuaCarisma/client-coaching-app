@@ -1,0 +1,11 @@
+{
+  "name": "@bbc/service-analytics",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "ts-node-dev src/index.ts",
+    "test": "vitest",
+    "lint": "eslint . --ext .ts"
+  }
+}
