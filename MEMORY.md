@@ -12,8 +12,9 @@ Monorepo scaffolded, app frameworks bootstrapped, and local Keycloak infrastruct
 Docker Compose stack (`infra/local/`) starts Keycloak 26.2 + a dedicated Postgres on port 5433.
 `bbc` realm defined in `infra/keycloak/bbc-realm.json` with 3 roles and 2 confidential OIDC
 clients. Node upgraded to 22.13.0 (via nvm); `eslint-visitor-keys` override removed; all 22
-workspaces still pass `turbo run lint`. Docker Desktop is not yet installed — smoke test
-pending. All auth/RBAC decisions are closed; next session implements identity service code.
+workspaces still pass `turbo run lint`. Rancher Desktop (dockerd/moby mode, Kubernetes deactivated) is installed. Smoke test
+passed — Keycloak 26.2 confirmed running at localhost:8080 with bbc realm imported.
+All auth/RBAC decisions are closed; next session implements identity service code.
 
 ---
 
@@ -30,7 +31,7 @@ pending. All auth/RBAC decisions are closed; next session implements identity se
   - `infra/local/docker-compose.yml` — start Keycloak locally before testing auth flows
   - `infra/keycloak/bbc-realm.json` — realm config, client IDs, token lifespans
   - `ARCHITECTURE.md` — auth flow design, role matrix, RBAC model
-- **Before starting:** Install Docker Desktop (not yet installed) to run the Keycloak stack locally.
+- **Before starting:** Start Rancher Desktop, then run `docker compose up -d` from `infra/local/` before testing auth flows.
 - **Prerequisite:** Auth changes require explicit approval — confirmed in scope for this branch.
 
 ---
@@ -79,9 +80,6 @@ Dated record of what was decided and why. Never delete entries — only add new 
 
 ## Current Tech Debt
 
-- **2026-04-22 Docker Desktop not installed:** Keycloak Docker Compose stack is defined and
-  correct, but cannot be smoke-tested until Docker Desktop is installed. Install before
-  beginning identity service work so auth flows can be tested locally.
 - **2026-04-22 No ESLint or Prettier config yet (RESOLVED):** Shared configs now live
   in `packages/config/`. All 22 workspaces pass `turbo run lint` and `turbo run format`.
 - **2026-04-22 pnpm engine-strict (RESOLVED):** `.npmrc` has `engine-strict=true`;
@@ -120,7 +118,7 @@ Dated record of what was decided and why. Never delete entries — only add new 
 - 2026-04-22 ✅ `infra/keycloak/bbc-realm.json` — bbc realm, roles: coach/client/admin, clients: mobile-bff + coach-bff (confidential, PKCE S256), access token 900s, refresh 604800s
 - 2026-04-22 ✅ `infra/local/.env.example` — all required keys documented
 - 2026-04-22 ✅ `infra/local/README.md` — startup command, force-reimport steps, client secret rotation note
-- 2026-04-22 ⏳ Keycloak smoke test pending — Docker Desktop not installed
+- 2026-04-22 ✅ Keycloak smoke test passed — Rancher Desktop (dockerd/moby mode), Keycloak 26.2 confirmed at localhost:8080, bbc realm imported
 
 ---
 
@@ -135,8 +133,7 @@ Dated record of what was decided and why. Never delete entries — only add new 
 - [x] Upgrade local Node to >= 22.13.0 and remove pnpm eslint-visitor-keys override
 
 **Phase 1 — MVP**
-- [ ] Install Docker Desktop (prerequisite for local Keycloak smoke test and dev auth flows)
-- [ ] Smoke test `docker compose up` in `infra/local/` — confirm Keycloak at localhost:8080, bbc realm imported
+- [x] Smoke test `docker compose up` in `infra/local/` — Keycloak confirmed at localhost:8080, bbc realm imported (Rancher Desktop)
 - [ ] Identity service + Keycloak setup (approved; branch: setup/identity)
 - [ ] Auth flow in mobile app (login, session, consent)
 - [ ] Training service — exercise library, workout/program builder
