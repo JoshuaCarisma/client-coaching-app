@@ -3,6 +3,7 @@
 Backend-for-Frontend gateway for the React Native mobile client.
 
 Responsibilities:
+
 - JWT bearer token validation (Keycloak OIDC) on all inbound requests
 - Request authorization — RBAC enforcement before forwarding to domain services
 - Rate limiting for public-facing mobile endpoints

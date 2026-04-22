@@ -3,6 +3,7 @@
 Owns the exercise library, workout definitions, programs, session execution, and logging.
 
 Responsibilities:
+
 - Exercise catalog (seeded from wger — product logic is custom-owned, not wger-coupled)
 - Workout and program builder — sets, reps, rest, RPE, supersets, circuits
 - Program phases and progression logic

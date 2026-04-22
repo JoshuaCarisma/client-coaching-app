@@ -3,6 +3,7 @@
 Backend-for-Frontend gateway for the coach web dashboard.
 
 Responsibilities:
+
 - JWT bearer token validation (Keycloak OIDC) on all inbound requests
 - Authorization enforcement — coach and admin role gating
 - Rate limiting for coach-facing endpoints

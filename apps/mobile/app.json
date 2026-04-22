@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "Body By Carisma",
+    "slug": "body-by-carisma",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "bodybycarisma",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.bodybycarisma.mobile"
+    },
+    "android": {
+      "package": "com.bodybycarisma.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "plugins": ["expo-dev-client"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

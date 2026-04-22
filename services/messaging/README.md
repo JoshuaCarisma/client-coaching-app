@@ -3,6 +3,7 @@
 Owns message threads, room management, and presence via Matrix Synapse.
 
 Responsibilities:
+
 - Direct coach–client messaging rooms
 - Group and cohort channels
 - Community and challenge threads

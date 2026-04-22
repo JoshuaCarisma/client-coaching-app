@@ -4,6 +4,7 @@ Owns journal entries, media metadata, transcripts, AI summaries, tags, and the
 client timeline. Journaling is a first-class data input — not a notes field.
 
 Responsibilities:
+
 - Canonical journal record — text, audio, and video entry types
 - Asset metadata — links to Supabase Storage objects uploaded via ingestion service
 - Transcript attachment — receives completed transcripts from ingestion pipeline

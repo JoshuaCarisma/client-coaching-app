@@ -3,6 +3,7 @@
 Owns recipes, meal plans, adherence logs, the client recipe library, and macro targets.
 
 Responsibilities:
+
 - Recipe management — ingredients, macros, instructions, coach-created and templated
 - Meal plan builder — ordered meal sequences tied to coaching goals
 - Adherence logging — client marks recipe adherence; links to calendar schedule object
@@ -13,6 +14,7 @@ Responsibilities:
 - Emits `recipe.adherence.logged` events consumed by Analytics
 
 Permission tiers must be enforced:
+
 - General guidance: any coach can set macro targets and recommend recipes
 - Meal review: coach reviews client-submitted meal photos
 - Full meal planning: requires coach credential gating — not available by default

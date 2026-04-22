@@ -3,6 +3,7 @@
 Owns reminder delivery, alert routing, and notification preferences via Novu.
 
 Responsibilities:
+
 - Workout reminders — triggered from `plan.scheduled` events
 - Recipe and habit reminders
 - Coach-initiated push alerts and announcements
