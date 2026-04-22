@@ -27,8 +27,7 @@ All architectural decisions are now closed — ready for Identity service + Keyc
   - `services/mobile-bff/` — Hono (decided); wires to identity for token validation
   - `services/coach-bff/` — Hono (decided); wires to identity for token validation
   - `ARCHITECTURE.md` — auth flow design, role matrix, RBAC model
-- **Before starting:** confirm Keycloak deployment strategy (self-hosted vs managed)
-  and whether Supabase Auth or Keycloak holds the ground truth for user records.
+- **Before starting:** both Keycloak deployment and identity source of truth decisions are closed (see Decisions Log).
 
 ---
 
@@ -49,6 +48,8 @@ Dated record of what was decided and why. Never delete entries — only add new 
 | 2026-04-22 | services/video scaffolded as Phase 2 stub only | LiveKit integration is out of scope for MVP; reserved with README to avoid accidental feature creep | Full live-class and async recorded coaching features will require scoping session |
 | 2026-04-22 | ✅ CLOSED — Event bus: Supabase Realtime (Phase 1) | Low ops overhead, already in the stack, sufficient for MVP event fan-out. Revisit if Phase 2 analytics load demands Kafka/SQS | Supabase Realtime has throughput ceilings; plan migration path before analytics scale |
 | 2026-04-22 | ✅ CLOSED — BFF implementation: Hono | TypeScript-first, edge-compatible, minimal overhead, works on Node + Cloudflare Workers | Smaller ecosystem than Express; middleware patterns differ from Express conventions |
+| 2026-04-22 | ✅ CLOSED — Keycloak deployment: Docker Compose (local dev only); managed service for staging/prod | Self-hosted AWS Keycloak adds ops overhead before product has traction; managed handles patching, HA, backups | Managed has vendor dependency and cost; self-hosted remains an option post-Series-A |
+| 2026-04-22 | ✅ CLOSED — Identity source of truth: Keycloak owns identity, credentials, roles, token issuance | Single source prevents split-brain auth state; Supabase Auth is NOT used | Supabase stores profile data only (keyed on Keycloak `sub`); RLS policies accept Keycloak JWTs directly |
 
 ---
 
@@ -142,7 +143,7 @@ Dated record of what was decided and why. Never delete entries — only add new 
 
 - **GitHub:** `github.com/JoshuaCarisma/client-coaching-app` — public repo, master branch
 - **Supabase:** v1 database + storage — account setup needed before service work begins
-- **Keycloak:** needs self-hosted instance or managed deployment configured before auth work
+- **Keycloak:** Docker Compose for local dev (`infra/local/`); managed service for staging/prod. bbc realm defined in `infra/keycloak/bbc-realm.json`.
 - **AWS:** core production hosting — account and IAM setup needed before infra work
 - **Expo EAS:** mobile build pipeline — EAS account setup needed before first mobile build
 
