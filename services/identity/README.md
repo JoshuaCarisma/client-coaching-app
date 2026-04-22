@@ -3,6 +3,7 @@
 Owns users, roles, organizations, consent records, permissions, and session context.
 
 Responsibilities:
+
 - Keycloak OIDC integration — token issuance, refresh, introspection
 - User profile creation and management (coach, client, admin roles)
 - Organization membership and multi-coach tenancy

@@ -4,6 +4,7 @@ The orchestration layer for cross-domain daily planning. Owns schedule objects,
 daily plans, recurrence rules, and the coach-defined daily structure.
 
 Responsibilities:
+
 - Schedule object creation — links workouts, recipes, habits, and tasks into a client day
 - Recurrence engine — daily, weekly, custom repeat patterns
 - Cross-domain plan assembly — references Training and Nutrition definitions; does not own them

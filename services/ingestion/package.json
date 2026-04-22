@@ -6,6 +6,11 @@
     "build": "tsc -p tsconfig.json",
     "dev": "ts-node-dev src/index.ts",
     "test": "vitest",
-    "lint": "eslint . --ext .ts"
-  }
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@bbc/config": "workspace:*"
+  },
+  "prettier": "@bbc/config/prettier"
 }
