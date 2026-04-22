@@ -9,8 +9,15 @@ Review our entire conversation this session and update MEMORY.md:
 3. **Decisions Log** — add any decisions we made with date, reasoning, and tradeoff
 4. **Solved Problems** — add anything we debugged or figured out
 5. **Tech Debt** — add any shortcuts we knowingly took
-6. **What's Been Built** — move anything completed from What's Left
+6. **What's Been Built** — move anything completed from What's Left, add ✅ and today's date
 7. **Session Notes** — add one line summary of today dated [YYYY-MM-DD]
 
 Be specific in Resume Here — future me needs to know exactly where to start.
 Do not remove any existing entries. Only add new ones.
+
+After updating MEMORY.md, show me:
+- A bullet list of what was accomplished this session
+- What the Resume Here section now says
+
+Then always end with this exact block:
+"Run this to save your progress:
