@@ -55,6 +55,30 @@ Dev-only placeholder secrets are baked into `bbc-realm.json`:
 
 **These must be rotated before any staging or production deployment.** Set new secrets via the Keycloak admin console (Clients → [client] → Credentials → Regenerate) and update each BFF service's environment config accordingly.
 
+## Test Users
+
+A test user is required for the Vitest integration tests in `services/identity/__tests__/`. Add these values to `infra/local/.env`:
+
+```sh
+KC_TEST_USER=testuser@bbc.dev
+KC_TEST_PASSWORD=testpass123
+```
+
+To create the test user manually (if not using the API):
+1. Open `http://localhost:8080` → admin console
+2. Switch to `bbc` realm
+3. Users → Create user → `username: testuser@bbc.dev`, `firstName: Test`, `lastName: User`, enable → Save
+4. Credentials tab → Set password (`testpass123`) → disable "Temporary"
+5. Role mapping → assign `client` role from realm roles
+
+The test user is created automatically when you run the admin API commands in the setup script.
+
+Run integration tests with:
+```sh
+KC_TEST_USER=testuser@bbc.dev KC_TEST_PASSWORD=testpass123 INTEGRATION=true \
+  pnpm --filter @bbc/service-identity test:integration
+```
+
 ## Stopping and cleaning up
 
 ```sh
