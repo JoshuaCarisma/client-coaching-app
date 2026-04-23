@@ -1,39 +1,39 @@
 # Memory: Body By Carisma — Client Coaching Platform
-Last updated: 2026-04-22 by Claude
+Last updated: 2026-04-23 by Claude
 
 ---
 
 ## Current Status
-**Phase:** Setup — Local identity infrastructure defined
-**Last worked on:** 2026-04-22
+**Phase:** Setup — Mobile auth foundation (Session 5A complete)
+**Last worked on:** 2026-04-23
 **Overall health:** On track
 
-Monorepo scaffolded, app frameworks bootstrapped, and local Keycloak infrastructure created.
-Docker Compose stack (`infra/local/`) starts Keycloak 26.2 + a dedicated Postgres on port 5433.
-`bbc` realm defined in `infra/keycloak/bbc-realm.json` with 3 roles and 2 confidential OIDC
-clients. Node upgraded to 22.13.0 (via nvm); `eslint-visitor-keys` override removed; all 22
-workspaces still pass `turbo run lint`. Rancher Desktop (dockerd/moby mode, Kubernetes deactivated) is installed. Smoke test
-passed — Keycloak 26.2 confirmed running at localhost:8080 with bbc realm imported.
-All auth/RBAC decisions are closed; next session implements identity service code.
+Session 5A complete. Expo SDK upgraded 52 → 53 (react@19, react-native@0.79.6). Auth dependencies
+installed (expo-router, expo-auth-session, expo-secure-store, expo-web-browser). Expo Router file
+structure scaffolded with (auth) and (app) route groups. packages/auth created with pure TypeScript
+token utilities (AuthSession, AuthStatus, parseTokenExpiry, buildSession, etc). tokenStorage.ts
+written with per-key SecureStore pattern. turbo run build 22/22, turbo run lint 23/23.
+Session 5B covers: AuthContext, PKCE service, login/consent screens, Stack.Protected auth gate, env wiring, Vitest tests.
 
 ---
 
 ## Resume Here (Next Session Starts At)
 
-- **Next task:** Identity service code — Hono app skeleton, JWT middleware (Keycloak public key
-  fetch + RS256 verify), role-extraction middleware, Zod schemas for token claims, Supabase
-  migration for `profiles` table (keyed on Keycloak `sub`), BFF wiring.
-- **Branch:** `setup/identity` (already created from master)
+- **Branch:** `feature/mobile-auth` (continue — do NOT create a new branch)
+- **Next task (Session 5B):** AuthContext with useReducer, Keycloak PKCE service, consent and
+  login screens wired up, Stack.Protected auth gate in root layout, env wiring for Keycloak URLs,
+  Vitest integration tests against local Keycloak
 - **Relevant files:**
-  - `services/identity/` — service stub, ready for Hono runtime code
-  - `services/mobile-bff/` — Hono (decided); wires to identity for token validation
-  - `services/coach-bff/` — Hono (decided); wires to identity for token validation
-  - `infra/local/docker-compose.yml` — start Keycloak locally before testing auth flows
+  - `apps/mobile/app/_layout.tsx` — root layout (Slot stub; add Stack.Protected here in 5B)
+  - `apps/mobile/app/(auth)/login.tsx` — login screen stub (implement PKCE in 5B)
+  - `apps/mobile/app/(auth)/consent.tsx` — consent screen stub (implement in 5B)
+  - `apps/mobile/app/(app)/index.tsx` — home screen stub
+  - `apps/mobile/src/services/tokenStorage.ts` — per-key SecureStore service (done)
+  - `packages/auth/src/` — AuthSession types + token utilities (done)
+  - `infra/local/docker-compose.yml` — start Keycloak locally before testing
   - `infra/keycloak/bbc-realm.json` — realm config, client IDs, token lifespans
-  - `ARCHITECTURE.md` — auth flow design, role matrix, RBAC model
-- **Before starting:** Start Rancher Desktop, then run `docker compose up -d` from `infra/local/`. Both containers must show `(healthy)` before testing auth flows.
-- **Next task:** Mobile auth flow — login screen, Keycloak PKCE flow, token storage, session management, consent screen. Do NOT start until scoped in session.
-- **Prerequisite:** Auth changes require explicit approval — get confirmation before beginning mobile auth work.
+- **Before starting 5B:** Start Rancher Desktop, `docker compose up -d` from `infra/local/`, confirm both containers (healthy)
+- **Auth work pre-approved** for the scope listed in the 5B prompt
 
 ---
 
@@ -136,6 +136,10 @@ Dated record of what was decided and why. Never delete entries — only add new 
 - 2026-04-22 ✅ turbo run build — 21/21 workspaces pass
 - 2026-04-22 ✅ turbo run lint — 22/22 workspaces pass
 - 2026-04-23 ✅ Expo SDK upgraded 52 → 53; node-linker=hoisted added to root .npmrc; react@19.0.0, react-native@0.79.6, expo-dev-client@5.2.4 updated to SDK 53 compatible versions
+- 2026-04-23 ✅ apps/mobile/ — expo-router@5.1.11, expo-auth-session@6.2.1, expo-secure-store@14.2.4, expo-web-browser@14.2.0 installed; app.json updated (scheme: com.bodybycarisma.mobile, expo-router/expo-secure-store/expo-web-browser plugins, typedRoutes: true); tsconfig.json: extends expo/tsconfig.base, moduleResolution: bundler
+- 2026-04-23 ✅ apps/mobile/app/ — Expo Router file structure: root _layout.tsx (Slot), (auth) group (_layout.tsx Stack + consent.tsx + login.tsx stubs), (app) group (_layout.tsx Stack + index.tsx stub)
+- 2026-04-23 ✅ packages/auth/ — @bbc/auth@0.0.1: AuthSession interface, AuthStatus type, re-exports from @bbc/schemas; parseTokenExpiry, isTokenExpired, shouldRefresh, buildSession; wired into turbo build graph (22/22 build, 23/23 lint)
+- 2026-04-23 ✅ apps/mobile/src/services/tokenStorage.ts — per-key SecureStore storage; five namespaced constants (BBC_ACCESS_TOKEN, BBC_REFRESH_TOKEN, BBC_EXPIRES_AT, BBC_TOKEN_TYPE, BBC_CONSENT_GIVEN); saveSession, loadSession, clearSession, getConsentGiven, setConsentGiven
 
 ---
 
@@ -152,7 +156,7 @@ Dated record of what was decided and why. Never delete entries — only add new 
 **Phase 1 — MVP**
 - [x] Smoke test `docker compose up` in `infra/local/` — Keycloak confirmed at localhost:8080, bbc realm imported (Rancher Desktop)
 - [x] Identity service foundation — Hono app, JWT/roles middleware, health route, Supabase profiles migration, BFF wiring (branch: setup/identity)
-- [ ] Auth flow in mobile app (login, session, consent)
+- [ ] Mobile auth — Session 5A complete (foundation). Session 5B: AuthContext, PKCE flow, screens, Stack.Protected auth gate, integration tests.
 - [ ] Training service — exercise library, workout/program builder
 - [ ] Workout player with timed engine
 - [ ] Nutrition service — recipes, meal plans, adherence logging
@@ -200,3 +204,4 @@ Dated record of what was decided and why. Never delete entries — only add new 
   removed; lint still 22/22 clean. Docker Compose stack + bbc realm JSON written.
   Smoke test blocked — correction: Rancher Desktop was already installed; smoke test passed; MEMORY.md corrected at start of session 4.
 - 2026-04-22 (session 4): Identity service foundation. packages/schemas Zod schemas (UserIdentity, TokenClaims, Role enum). services/identity Hono app with JWT middleware (jose JWKS+RS256), roles middleware (requireRole guard), health route, Supabase profiles migration SQL. services/mobile-bff and services/coach-bff wired with JWT+roles middleware from @bbc/service-identity. All stub workspaces given tsconfig+src stubs. Mobile/marketing-site build scripts changed to no-op (native toolchain / Next.js not installed). Next-env.d.ts lint issue fixed for Next.js apps. turbo run build 21/21, turbo run lint 22/22. Next: mobile auth flow (login, PKCE, token storage, consent) — requires approval.
+- 2026-04-23 (session 5A): Expo SDK upgraded 52 → 53. node-linker=hoisted added to root .npmrc (required for pnpm + SDK 53 compatibility). Auth dependencies installed (expo-router, expo-auth-session, expo-secure-store, expo-web-browser). Expo Router file structure scaffolded with (auth) and (app) route groups. packages/auth created with pure TypeScript token utilities and AuthSession types. tokenStorage.ts written with per-key SecureStore pattern to avoid iOS Keychain 2KB size limit. turbo run build 22/22, turbo run lint 23/23. Session 5B covers: AuthContext, PKCE service, screens, auth gate, tests.
