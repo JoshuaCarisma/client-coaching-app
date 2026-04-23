@@ -19,6 +19,7 @@ ios/
 .env
 .env.local
 .env.*.local
+infra/local/.env
 
 # Editor
 .DS_Store
@@ -32,3 +33,6 @@ coverage/
 
 # TypeScript
 *.tsbuildinfo
+
+# Next.js generated files
+next-env.d.ts

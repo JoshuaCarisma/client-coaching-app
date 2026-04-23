@@ -4,7 +4,7 @@
     "slug": "body-by-carisma",
     "version": "1.0.0",
     "orientation": "portrait",
-    "scheme": "bodybycarisma",
+    "scheme": "com.bodybycarisma.mobile",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -17,7 +17,12 @@
         "backgroundColor": "#ffffff"
       }
     },
-    "plugins": ["expo-dev-client"],
+    "plugins": [
+      "expo-dev-client",
+      "expo-secure-store",
+      "expo-web-browser",
+      "expo-router"
+    ],
     "experiments": {
       "typedRoutes": true
     }

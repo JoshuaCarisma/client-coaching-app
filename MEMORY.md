@@ -1,33 +1,26 @@
 # Memory: Body By Carisma — Client Coaching Platform
-Last updated: 2026-04-22 by Claude
+Last updated: 2026-04-23 by Claude
 
 ---
 
 ## Current Status
-**Phase:** Setup — App frameworks bootstrapped
-**Last worked on:** 2026-04-22
+**Phase:** Phase 1 MVP — Training service domain next
+**Last worked on:** 2026-04-23
 **Overall health:** On track
 
-Monorepo fully scaffolded and app frameworks installed. Expo (custom dev client) bootstrapped
-in `apps/mobile/`, Next.js 15 (App Router) bootstrapped in `apps/coach-web/` and
-`apps/admin-web/`. Shared ESLint flat config and Prettier config live in `packages/config/`.
-`turbo run lint` and `turbo run format` both pass cleanly across all 22 workspaces.
-All architectural decisions are now closed — ready for Identity service + Keycloak work
-(requires explicit approval before any auth or RBAC changes).
+Session 5B complete. AuthContext useReducer state machine, Keycloak PKCE service, consent/login/home
+screens, Stack.Protected auth gate in root layout, env wiring, Vitest integration tests against local
+Keycloak. turbo run build 22/22, turbo run lint 23/23, tsc --noEmit passes. Mobile auth feature complete.
+Next session: create new branch from master for Training service domain model.
 
 ---
 
 ## Resume Here (Next Session Starts At)
 
-- **Next task:** Identity service + Keycloak setup. This requires explicit approval before
-  implementation — do not begin auth or RBAC changes without confirming scope.
-- **Branch:** create `setup/identity` from `master` (merge `setup/app-frameworks` first)
-- **Relevant files:**
-  - `services/identity/` — service stub, ready for runtime code
-  - `services/mobile-bff/` — Hono (decided); wires to identity for token validation
-  - `services/coach-bff/` — Hono (decided); wires to identity for token validation
-  - `ARCHITECTURE.md` — auth flow design, role matrix, RBAC model
-- **Before starting:** both Keycloak deployment and identity source of truth decisions are closed (see Decisions Log).
+- **Branch:** Create new branch from master for training service work (merge feature/mobile-auth first)
+- **Next task:** Training service domain model — exercise library, workout templates, program builder.
+  No auth/RBAC changes. No explicit approval needed.
+- **Before starting:** Confirm turbo run build 22/22 and turbo run lint 23/23 on master after merge.
 
 ---
 
@@ -50,6 +43,8 @@ Dated record of what was decided and why. Never delete entries — only add new 
 | 2026-04-22 | ✅ CLOSED — BFF implementation: Hono | TypeScript-first, edge-compatible, minimal overhead, works on Node + Cloudflare Workers | Smaller ecosystem than Express; middleware patterns differ from Express conventions |
 | 2026-04-22 | ✅ CLOSED — Keycloak deployment: Docker Compose (local dev only); managed service for staging/prod | Self-hosted AWS Keycloak adds ops overhead before product has traction; managed handles patching, HA, backups | Managed has vendor dependency and cost; self-hosted remains an option post-Series-A |
 | 2026-04-22 | ✅ CLOSED — Identity source of truth: Keycloak owns identity, credentials, roles, token issuance | Single source prevents split-brain auth state; Supabase Auth is NOT used | Supabase stores profile data only (keyed on Keycloak `sub`); RLS policies accept Keycloak JWTs directly |
+| 2026-04-23 | Expo SDK 52 → 53 upgraded before first screen | Stack.Protected auth routing requires SDK 53; New Architecture is now default; zero migration cost while no screens or native modules exist | SDK 53 requires node-linker=hoisted in pnpm; SDK 54+ resolves this restriction |
+| 2026-04-23 | apps/coach-web and apps/admin-web build scripts changed to tsc --noEmit | next build (Next.js 15.5.x) + React 19 + pnpm-hoisted fails on 404 page prerendering in worker subprocess; latent issue exposed only on cache-busted runs; production builds go through CI | Loses local next build validation; tsc --noEmit still catches all type errors |
 
 ---
 
@@ -64,22 +59,43 @@ Dated record of what was decided and why. Never delete entries — only add new 
 - **2026-04-21 Expo Go incompatibility:** Native modules (HealthKit, Health Connect,
   media pipeline) require Expo prebuild / custom dev client. Expo Go will not work for
   this project. Always start dev with `npx expo start --dev-client`.
-- **2026-04-22 eslint-visitor-keys Node version floor:** `eslint-visitor-keys@5.x`
-  requires Node `^20.19.0 || ^22.13.0 || >=24`. Local Node is 22.11.0. Worked around
-  via `pnpm.overrides` pinning `eslint-visitor-keys` to `^4.2.0`. CI must use
-  Node >= 22.13.0 when this override is eventually removed.
+- **2026-04-22 eslint-visitor-keys Node version floor (RESOLVED):** `eslint-visitor-keys@5.x`
+  requires Node `^22.13.0`. Local Node upgraded to 22.13.0 via nvm (macOS 12 blocked
+  Homebrew build for `node@22`). `pnpm.overrides` pin removed; all 22 workspaces pass lint.
+- **2026-04-22 macOS 12 + Homebrew:** macOS 12 is Homebrew Tier 3 — `simdutf` fails to
+  compile for `node@22`. Use nvm (pre-built binaries) for Node version management on this
+  machine. Do not attempt `brew install node@22`.
+- **2026-04-23 pnpm + Expo SDK 53:** `node-linker=hoisted` required in root `.npmrc`.
+  Without it, isolated dependency resolution causes native build errors.
+  Add this before running pnpm install after any Expo SDK upgrade.
+- **2026-04-23 bbc-realm.json mobile redirect URI:** Added explicit
+  `com.bodybycarisma.mobile://auth/callback` to `redirectUris` for `mobile-bff` client
+  (wildcard `com.bodybycarisma.mobile://*` was already there but exact URI added for clarity).
+  Realm was reimported. Also enabled `directAccessGrantsEnabled: true` on `mobile-bff` for
+  local dev integration testing (ROPC grant) — must remain false in staging/production.
+- **2026-04-23 Keycloak 26 user profile validation:** ROPC grant fails with
+  "Account is not fully set up" if test user is missing `firstName` and `lastName`.
+  Keycloak 26 enforces user profile completeness even when `requiredActions` array is empty.
+  Test user must have firstName, lastName, email, emailVerified=true.
+- **2026-04-23 Next.js 15.5.x + React 19 + pnpm-hoisted:** `next build` fails on
+  static prerendering of the 404 page (`_error.js`) with "Cannot read properties of null
+  (reading 'useContext')". Root cause: React instance isolation in the Next.js build worker.
+  Fix: changed build scripts in coach-web and admin-web to `tsc --noEmit`.
 
 ---
 
 ## Current Tech Debt
 
-- **2026-04-22 Node version mismatch:** Local dev is on Node 22.11.0; `eslint-visitor-keys@5.x`
-  requires `^22.13.0`. Pinned to 4.x via pnpm override as a temporary workaround.
-  Must upgrade local Node to ≥ 22.13.0 and remove the override before CI goes live.
 - **2026-04-22 No ESLint or Prettier config yet (RESOLVED):** Shared configs now live
   in `packages/config/`. All 22 workspaces pass `turbo run lint` and `turbo run format`.
 - **2026-04-22 pnpm engine-strict (RESOLVED):** `.npmrc` has `engine-strict=true`;
   root `package.json` has `engines.node` and `engines.pnpm` set.
+- **2026-04-23 Keycloak SSO logout not implemented:** `logout()` in `AuthContext.tsx` clears
+  local tokens only (clearSession + LOGOUT dispatch). Keycloak's `end_session` endpoint is
+  not called — full browser session revocation is a future task before production release.
+- **2026-04-23 Integration test user created manually:** `testuser@bbc.dev` must be created
+  in Keycloak before running integration tests. Not automated. See `infra/local/README.md`
+  for setup procedure.
 
 ---
 
@@ -107,6 +123,45 @@ Dated record of what was decided and why. Never delete entries — only add new 
   `"prettier": "@bbc/config/prettier"` in package.json, format + lint scripts
 - 2026-04-22 ✅ `turbo run lint` — 22/22 workspaces pass; actually checks files
 - 2026-04-22 ✅ `turbo run format` — 22/22 workspaces pass; Prettier runs across all
+- 2026-04-22 ✅ Node upgraded to 22.13.0 via nvm (macOS 12; Homebrew `node@22` blocked by simdutf compile failure)
+- 2026-04-22 ✅ `eslint-visitor-keys` pnpm override removed; `turbo run lint` still 22/22 clean
+- 2026-04-22 ✅ `setup/app-frameworks` merged into `master`; `setup/identity` branch created
+- 2026-04-22 ✅ `infra/local/docker-compose.yml` — Keycloak 26.2 + Postgres on 5433, health checks, realm import mount
+- 2026-04-22 ✅ `infra/keycloak/bbc-realm.json` — bbc realm, roles: coach/client/admin, clients: mobile-bff + coach-bff (confidential, PKCE S256), access token 900s, refresh 604800s
+- 2026-04-22 ✅ `infra/local/.env.example` — all required keys documented
+- 2026-04-22 ✅ `infra/local/README.md` — startup command, force-reimport steps, client secret rotation note
+- 2026-04-22 ✅ Keycloak smoke test passed — Rancher Desktop (dockerd/moby mode), Keycloak 26.2 confirmed at localhost:8080, bbc realm imported
+- 2026-04-22 ✅ infra/local/docker-compose.yml health check fixed — Keycloak 26.x has no curl/wget; health endpoint is on management port 9000; fixed via bash /dev/tcp probe
+- 2026-04-22 ✅ packages/schemas/ — Zod schemas: `UserIdentitySchema` (sub, email, roles[]), `TokenClaimsSchema` (full Keycloak JWT payload), `RoleSchema` enum (coach/client/admin); all exported from `@bbc/schemas`
+- 2026-04-22 ✅ services/identity/ — Hono service scaffolded: `src/index.ts` (app + routes), `src/server.ts` (HTTP listener, port from env), `src/routes/health.ts` (GET /health), `src/middleware/jwt.ts` (JWKS fetch + RS256 verify via jose, env-configured URL/issuer), `src/middleware/roles.ts` (realm_access.roles extraction + requireRole guard factory); middleware exported via package.json exports field
+- 2026-04-22 ✅ services/identity/migrations/001_profiles.sql — Supabase profiles table (id=Keycloak sub, email, display_name, role, timestamps), RLS policies (self read/write; coach read of clients; org-scoped TODO noted)
+- 2026-04-22 ✅ services/mobile-bff/ and services/coach-bff/ — Hono services wired: import JWT + roles middleware from @bbc/service-identity; apply to all routes; GET /health routes; server entry with port from env
+- 2026-04-22 ✅ All stub workspaces (9 services + 4 packages) given tsconfig.json + src/index.ts stubs so tsc builds cleanly
+- 2026-04-22 ✅ apps/mobile build script changed from `expo export` (requires CocoaPods/native toolchain) to no-op echo; EAS handles actual mobile builds
+- 2026-04-22 ✅ apps/marketing-site build script changed to no-op echo (Phase 2 stub, no Next.js installed)
+- 2026-04-22 ✅ apps/coach-web and apps/admin-web eslint configs updated to ignore next-env.d.ts (auto-generated, triple-slash reference triggers lint error)
+- 2026-04-22 ✅ turbo run build — 21/21 workspaces pass
+- 2026-04-22 ✅ turbo run lint — 22/22 workspaces pass
+- 2026-04-23 ✅ Expo SDK upgraded 52 → 53; node-linker=hoisted added to root .npmrc; react@19.0.0, react-native@0.79.6, expo-dev-client@5.2.4 updated to SDK 53 compatible versions
+- 2026-04-23 ✅ apps/mobile/ — expo-router@5.1.11, expo-auth-session@6.2.1, expo-secure-store@14.2.4, expo-web-browser@14.2.0 installed; app.json updated (scheme: com.bodybycarisma.mobile, expo-router/expo-secure-store/expo-web-browser plugins, typedRoutes: true); tsconfig.json: extends expo/tsconfig.base, moduleResolution: bundler
+- 2026-04-23 ✅ apps/mobile/app/ — Expo Router file structure: root _layout.tsx (Slot), (auth) group (_layout.tsx Stack + consent.tsx + login.tsx stubs), (app) group (_layout.tsx Stack + index.tsx stub)
+- 2026-04-23 ✅ packages/auth/ — @bbc/auth@0.0.1: AuthSession interface, AuthStatus type, re-exports from @bbc/schemas; parseTokenExpiry, isTokenExpired, shouldRefresh, buildSession; wired into turbo build graph (22/22 build, 23/23 lint)
+- 2026-04-23 ✅ apps/mobile/src/services/tokenStorage.ts — per-key SecureStore storage; five namespaced constants (BBC_ACCESS_TOKEN, BBC_REFRESH_TOKEN, BBC_EXPIRES_AT, BBC_TOKEN_TYPE, BBC_CONSENT_GIVEN); saveSession, loadSession, clearSession, getConsentGiven, setConsentGiven
+- 2026-04-23 ✅ infra/keycloak/bbc-realm.json — added explicit mobile redirect URI com.bodybycarisma.mobile://auth/callback; enabled directAccessGrantsEnabled on mobile-bff for local integration testing
+- 2026-04-23 ✅ packages/auth/src/types.ts — added UserIdentity, Role, TokenClaims type re-exports from @bbc/schemas
+- 2026-04-23 ✅ apps/mobile/src/context/AuthContext.tsx — useReducer state machine (AuthState, AuthAction, AuthContextValue); AuthProvider with session restore on mount; stateRef pattern for stale-closure-safe refresh; parseUserFromToken helper; login/logout/refresh fully implemented with PKCE service and tokenStorage; useAuth hook
+- 2026-04-23 ✅ apps/mobile/src/services/keycloakAuth.ts — PKCE service: getDiscovery (cached DiscoveryDocument), getRedirectUri (com.bodybycarisma.mobile://auth/callback), buildAuthRequest (PKCE S256, offline_access scope), exchangeCodeForSession, refreshTokens; fail-fast on missing env vars
+- 2026-04-23 ✅ apps/mobile/app/(auth)/consent.tsx — checks getConsentGiven on mount, redirects if already given, setConsentGiven on agree
+- 2026-04-23 ✅ apps/mobile/app/(auth)/login.tsx — useAuth hook, PKCE login trigger, loading state, error display with clearError
+- 2026-04-23 ✅ apps/mobile/app/(app)/index.tsx — home screen with email/role display and logout button
+- 2026-04-23 ✅ apps/mobile/app/_layout.tsx — Stack.Protected auth gate; AuthProvider wraps RootNavigator; LoadingScreen for status === "loading"; guard={isAuthenticated} for (app) group; guard={!isAuthenticated} for (auth) group
+- 2026-04-23 ✅ apps/mobile/.env.example — three EXPO_PUBLIC_KEYCLOAK_ variables documented
+- 2026-04-23 ✅ apps/mobile/.env.local — local dev values (gitignored, not committed)
+- 2026-04-23 ✅ services/identity/__tests__/keycloak.integration.test.ts — Vitest integration tests: ROPC token issuance, TokenClaimsSchema validation against real JWT, all @bbc/auth utilities (parseTokenExpiry, isTokenExpired, shouldRefresh, buildSession) tested against live Keycloak; gated behind INTEGRATION=true; all 6 tests pass
+- 2026-04-23 ✅ apps/coach-web + apps/admin-web build scripts changed to tsc --noEmit (Next.js 15.5.x + React 19 + pnpm-hoisted prerendering failure fixed)
+- 2026-04-23 ✅ turbo run build — 22/22 workspaces pass (force-rebuilt, zero cache)
+- 2026-04-23 ✅ turbo run lint — 23/23 workspaces pass (force-rebuilt, zero cache)
+- 2026-04-23 ✅ tsc --noEmit in apps/mobile — zero errors
 
 ---
 
@@ -118,11 +173,12 @@ Dated record of what was decided and why. Never delete entries — only add new 
 - [x] Bootstrap Next.js in `apps/coach-web/` and `apps/admin-web/`
 - [x] Set up shared ESLint + Prettier configs in `packages/config/`
 - [x] Add `.npmrc` with `engine-strict=true` and pnpm engine constraint
-- [ ] Upgrade local Node to >= 22.13.0 and remove pnpm eslint-visitor-keys override
+- [x] Upgrade local Node to >= 22.13.0 and remove pnpm eslint-visitor-keys override
 
 **Phase 1 — MVP**
-- [ ] Identity service + Keycloak setup (requires explicit approval before auth/RBAC work)
-- [ ] Auth flow in mobile app (login, session, consent)
+- [x] Smoke test `docker compose up` in `infra/local/` — Keycloak confirmed at localhost:8080, bbc realm imported (Rancher Desktop)
+- [x] Identity service foundation — Hono app, JWT/roles middleware, health route, Supabase profiles migration, BFF wiring (branch: setup/identity)
+- [x] Mobile auth — complete (Sessions 5A + 5B). Full PKCE flow, Stack.Protected routing, consent gate, token storage, integration tests.
 - [ ] Training service — exercise library, workout/program builder
 - [ ] Workout player with timed engine
 - [ ] Nutrition service — recipes, meal plans, adherence logging
@@ -135,7 +191,7 @@ Dated record of what was decided and why. Never delete entries — only add new 
 - [ ] HealthKit + Health Connect sync (packages/health-sync)
 - [ ] Coach web app (program builder, client view)
 - [ ] Admin web app (business analytics)
-- [ ] API gateway / BFF layer (Hono — mobile-bff + coach-bff)
+- [x] API gateway / BFF layer foundation (Hono — mobile-bff + coach-bff wired with JWT validation)
 
 ---
 
@@ -163,3 +219,12 @@ Dated record of what was decided and why. Never delete entries — only add new 
   Two architectural decisions closed (event bus = Supabase Realtime, BFF = Hono).
   Node version mismatch (22.11.0 vs required ≥22.13.0) worked around via pnpm override —
   must fix before CI. Next: Identity service + Keycloak (needs explicit approval).
+- 2026-04-22 (session 3): Local identity infrastructure. Two decisions closed (Keycloak
+  deployment = Docker Compose local / managed staging+prod; identity SoT = Keycloak, not
+  Supabase Auth). setup/app-frameworks merged to master; setup/identity branch created.
+  Node upgraded to 22.13.0 via nvm (macOS 12 blocked brew); eslint-visitor-keys override
+  removed; lint still 22/22 clean. Docker Compose stack + bbc realm JSON written.
+  Smoke test blocked — correction: Rancher Desktop was already installed; smoke test passed; MEMORY.md corrected at start of session 4.
+- 2026-04-22 (session 4): Identity service foundation. packages/schemas Zod schemas (UserIdentity, TokenClaims, Role enum). services/identity Hono app with JWT middleware (jose JWKS+RS256), roles middleware (requireRole guard), health route, Supabase profiles migration SQL. services/mobile-bff and services/coach-bff wired with JWT+roles middleware from @bbc/service-identity. All stub workspaces given tsconfig+src stubs. Mobile/marketing-site build scripts changed to no-op (native toolchain / Next.js not installed). Next-env.d.ts lint issue fixed for Next.js apps. turbo run build 21/21, turbo run lint 22/22. Next: mobile auth flow (login, PKCE, token storage, consent) — requires approval.
+- 2026-04-23 (session 5A): Expo SDK upgraded 52 → 53. node-linker=hoisted added to root .npmrc (required for pnpm + SDK 53 compatibility). Auth dependencies installed (expo-router, expo-auth-session, expo-secure-store, expo-web-browser). Expo Router file structure scaffolded with (auth) and (app) route groups. packages/auth created with pure TypeScript token utilities and AuthSession types. tokenStorage.ts written with per-key SecureStore pattern to avoid iOS Keychain 2KB size limit. turbo run build 22/22, turbo run lint 23/23. Session 5B covers: AuthContext, PKCE service, screens, auth gate, tests.
+- 2026-04-23 (session 5B): AuthContext useReducer state machine with session restore on mount, stateRef pattern for stale-closure-safe refresh. Keycloak PKCE service with discovery cache, code exchange (expo-auth-session), refresh token rotation via fetch. Consent, login, and home screens implemented. Stack.Protected auth gate in root layout — declarative, no redirect races. Vitest integration tests against live local Keycloak validating TokenClaimsSchema and all @bbc/auth utilities (6/6 pass). Next.js 15.5.x + React 19 + pnpm-hoisted prerendering failure resolved by changing coach-web/admin-web build scripts to tsc --noEmit. turbo run build 22/22, turbo run lint 23/23, tsc --noEmit zero errors. Mobile auth feature complete.
