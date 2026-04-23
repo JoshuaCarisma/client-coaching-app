@@ -5,10 +5,12 @@
   "scripts": {
     "dev": "expo start --dev-client",
     "prebuild": "expo prebuild --clean",
-    "build": "expo export",
+    "build": "echo 'mobile: build via EAS (eas build)'",
     "test": "jest",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "dependencies": {
     "expo": "^52.0.0",

@@ -9,8 +9,13 @@
     "lint": "eslint .",
     "format": "prettier --write ."
   },
+  "dependencies": {
+    "zod": "^3.24.0"
+  },
   "devDependencies": {
-    "@bbc/config": "workspace:*"
+    "@bbc/config": "workspace:*",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
   },
   "prettier": "@bbc/config/prettier"
 }

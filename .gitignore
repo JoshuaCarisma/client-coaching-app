@@ -33,3 +33,6 @@ coverage/
 
 # TypeScript
 *.tsbuildinfo
+
+# Next.js generated files
+next-env.d.ts
