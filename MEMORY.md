@@ -56,6 +56,7 @@ Dated record of what was decided and why. Never delete entries — only add new 
 | 2026-04-22 | ✅ CLOSED — BFF implementation: Hono | TypeScript-first, edge-compatible, minimal overhead, works on Node + Cloudflare Workers | Smaller ecosystem than Express; middleware patterns differ from Express conventions |
 | 2026-04-22 | ✅ CLOSED — Keycloak deployment: Docker Compose (local dev only); managed service for staging/prod | Self-hosted AWS Keycloak adds ops overhead before product has traction; managed handles patching, HA, backups | Managed has vendor dependency and cost; self-hosted remains an option post-Series-A |
 | 2026-04-22 | ✅ CLOSED — Identity source of truth: Keycloak owns identity, credentials, roles, token issuance | Single source prevents split-brain auth state; Supabase Auth is NOT used | Supabase stores profile data only (keyed on Keycloak `sub`); RLS policies accept Keycloak JWTs directly |
+| 2026-04-23 | Expo SDK 52 → 53 upgraded before first screen | Stack.Protected auth routing requires SDK 53; New Architecture is now default; zero migration cost while no screens or native modules exist | SDK 53 requires node-linker=hoisted in pnpm; SDK 54+ resolves this restriction |
 
 ---
 
@@ -76,6 +77,9 @@ Dated record of what was decided and why. Never delete entries — only add new 
 - **2026-04-22 macOS 12 + Homebrew:** macOS 12 is Homebrew Tier 3 — `simdutf` fails to
   compile for `node@22`. Use nvm (pre-built binaries) for Node version management on this
   machine. Do not attempt `brew install node@22`.
+- **2026-04-23 pnpm + Expo SDK 53:** `node-linker=hoisted` required in root `.npmrc`.
+  Without it, isolated dependency resolution causes native build errors.
+  Add this before running pnpm install after any Expo SDK upgrade.
 
 ---
 
@@ -131,6 +135,7 @@ Dated record of what was decided and why. Never delete entries — only add new 
 - 2026-04-22 ✅ apps/coach-web and apps/admin-web eslint configs updated to ignore next-env.d.ts (auto-generated, triple-slash reference triggers lint error)
 - 2026-04-22 ✅ turbo run build — 21/21 workspaces pass
 - 2026-04-22 ✅ turbo run lint — 22/22 workspaces pass
+- 2026-04-23 ✅ Expo SDK upgraded 52 → 53; node-linker=hoisted added to root .npmrc; react@19.0.0, react-native@0.79.6, expo-dev-client@5.2.4 updated to SDK 53 compatible versions
 
 ---
 
