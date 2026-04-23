@@ -66,11 +66,14 @@
       "publicClient": false,
       "standardFlowEnabled": true,
       "implicitFlowEnabled": false,
-      "directAccessGrantsEnabled": false,
+      "directAccessGrantsEnabled": true,
       "serviceAccountsEnabled": false,
       "authorizationServicesEnabled": false,
       "secret": "dev-mobile-bff-secret",
-      "redirectUris": ["com.bodybycarisma.mobile://*"],
+      "redirectUris": [
+        "com.bodybycarisma.mobile://auth/callback",
+        "com.bodybycarisma.mobile://*"
+      ],
       "webOrigins": ["+"],
       "attributes": {
         "pkce.code.challenge.method": "S256",
