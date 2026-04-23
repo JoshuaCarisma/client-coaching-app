@@ -4,6 +4,8 @@ export {
   RoleSchema,
 } from "@bbc/schemas";
 
+export type { UserIdentity, Role, TokenClaims } from "@bbc/schemas";
+
 export interface AuthSession {
   accessToken: string;
   refreshToken: string;
