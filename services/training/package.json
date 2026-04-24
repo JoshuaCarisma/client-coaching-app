@@ -3,14 +3,25 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "dev": "ts-node-dev src/index.ts",
+    "build": "tsc --noEmit",
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
     "test": "vitest",
     "lint": "eslint .",
     "format": "prettier --write ."
   },
   "devDependencies": {
-    "@bbc/config": "workspace:*"
+    "@bbc/config": "workspace:*",
+    "@hono/node-server": "^1.13.0",
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^6.0.3"
   },
-  "prettier": "@bbc/config/prettier"
+  "prettier": "@bbc/config/prettier",
+  "dependencies": {
+    "@bbc/schemas": "workspace:^",
+    "@bbc/service-identity": "workspace:^",
+    "@supabase/supabase-js": "^2.104.1",
+    "hono": "^4.7.0"
+  }
 }
