@@ -1,25 +1,27 @@
 # Memory: Body By Carisma — Client Coaching Platform
-Last updated: 2026-04-23 by Claude
+Last updated: 2026-04-24 by Claude
 
 ---
 
 ## Current Status
-**Phase:** Phase 1 MVP — Training service domain next
-**Last worked on:** 2026-04-23
+**Phase:** Phase 1 MVP — Training service exercise library complete
+**Last worked on:** 2026-04-24
 **Overall health:** On track
 
-Session 5B complete. AuthContext useReducer state machine, Keycloak PKCE service, consent/login/home
-screens, Stack.Protected auth gate in root layout, env wiring, Vitest integration tests against local
-Keycloak. turbo run build 22/22, turbo run lint 23/23, tsc --noEmit passes. Mobile auth feature complete.
-Next session: create new branch from master for Training service domain model.
+Session 7 complete. Exercise library domain: Zod schemas (MuscleGroup/Equipment/Difficulty enums +
+ExerciseSchema + CRUD request/response schemas), 001_exercises.sql migration applied to Supabase (GIN
+array indexes, full-text search index, RLS defense-in-depth), services/training/ Hono service with health
++ exercise CRUD routes. turbo run build 22/22, turbo run lint 23/23, tsc --noEmit zero errors. Health
+route smoke test passes. Branch: feature/training-service.
 
 ---
 
 ## Resume Here (Next Session Starts At)
 
-- **Branch:** Create new branch from master for training service work (merge feature/mobile-auth first)
-- **Next task:** Training service domain model — exercise library, workout templates, program builder.
-  No auth/RBAC changes. No explicit approval needed.
+- **Branch:** Create `feature/workout-templates` from master
+- **Next task:** WorkoutTemplateSchema + WorkoutExerciseSchema in `packages/schemas/`, `002_workout_templates.sql`
+  migration, workout template routes in `services/training/` (extend existing service, do not create new one)
+- **No auth/RBAC changes needed**
 - **Before starting:** Confirm turbo run build 22/22 and turbo run lint 23/23 on master after merge.
 
 ---
@@ -96,6 +98,8 @@ Dated record of what was decided and why. Never delete entries — only add new 
 - **2026-04-23 Integration test user created manually:** `testuser@bbc.dev` must be created
   in Keycloak before running integration tests. Not automated. See `infra/local/README.md`
   for setup procedure.
+- **2026-04-24 exercises POST/PATCH/DELETE have no owner-isolation test:** unit tests for
+  training routes are not yet written.
 
 ---
 
@@ -162,6 +166,9 @@ Dated record of what was decided and why. Never delete entries — only add new 
 - 2026-04-23 ✅ turbo run build — 22/22 workspaces pass (force-rebuilt, zero cache)
 - 2026-04-23 ✅ turbo run lint — 23/23 workspaces pass (force-rebuilt, zero cache)
 - 2026-04-23 ✅ tsc --noEmit in apps/mobile — zero errors
+- 2026-04-24 ✅ packages/schemas/src/training.ts — MuscleGroupSchema, EquipmentSchema, DifficultySchema enums; ExerciseSchema; request/response schemas: CreateExerciseSchema, UpdateExerciseSchema, ExerciseListQuerySchema, ExerciseListResponseSchema
+- 2026-04-24 ✅ services/training/migrations/001_exercises.sql — exercises table with GIN indexes on muscle_groups and equipment arrays, full-text search index on name+description, RLS policies (defense-in-depth), applied to Supabase
+- 2026-04-24 ✅ services/training/src/ — Hono service: db/client.ts (service_role Supabase client), routes/health.ts, routes/exercises.ts (GET list with filters, GET by id, POST, PATCH, DELETE); jwtMiddleware and requireRole("coach") applied; all boundaries Zod-validated; health route smoke test passes
 
 ---
 
@@ -179,7 +186,7 @@ Dated record of what was decided and why. Never delete entries — only add new 
 - [x] Smoke test `docker compose up` in `infra/local/` — Keycloak confirmed at localhost:8080, bbc realm imported (Rancher Desktop)
 - [x] Identity service foundation — Hono app, JWT/roles middleware, health route, Supabase profiles migration, BFF wiring (branch: setup/identity)
 - [x] Mobile auth — complete (Sessions 5A + 5B). Full PKCE flow, Stack.Protected routing, consent gate, token storage, integration tests.
-- [ ] Training service — exercise library, workout/program builder
+- [ ] Training service — exercise library ✅. Next: workout templates + programs (Session 8), mobile exercise browser (Session 9)
 - [ ] Workout player with timed engine
 - [ ] Nutrition service — recipes, meal plans, adherence logging
 - [ ] Journaling service — text/audio/video entry + upload pipeline
@@ -229,3 +236,4 @@ Dated record of what was decided and why. Never delete entries — only add new 
 - 2026-04-23 (session 5A): Expo SDK upgraded 52 → 53. node-linker=hoisted added to root .npmrc (required for pnpm + SDK 53 compatibility). Auth dependencies installed (expo-router, expo-auth-session, expo-secure-store, expo-web-browser). Expo Router file structure scaffolded with (auth) and (app) route groups. packages/auth created with pure TypeScript token utilities and AuthSession types. tokenStorage.ts written with per-key SecureStore pattern to avoid iOS Keychain 2KB size limit. turbo run build 22/22, turbo run lint 23/23. Session 5B covers: AuthContext, PKCE service, screens, auth gate, tests.
 - 2026-04-23 (session 5B): AuthContext useReducer state machine with session restore on mount, stateRef pattern for stale-closure-safe refresh. Keycloak PKCE service with discovery cache, code exchange (expo-auth-session), refresh token rotation via fetch. Consent, login, and home screens implemented. Stack.Protected auth gate in root layout — declarative, no redirect races. Vitest integration tests against live local Keycloak validating TokenClaimsSchema and all @bbc/auth utilities (6/6 pass). Next.js 15.5.x + React 19 + pnpm-hoisted prerendering failure resolved by changing coach-web/admin-web build scripts to tsc --noEmit. turbo run build 22/22, turbo run lint 23/23, tsc --noEmit zero errors. Mobile auth feature complete.
 - 2026-04-24 (session 6): Supabase setup complete. RLS policy bug (profiles_coach_read) fixed — removed self-referential subquery, now uses auth.jwt() claim directly. JWT wiring confirmed as Phase 2 task (not blocker) based on architecture: all client access through BFF with service_role key, RLS is defense-in-depth. Migration file updated with comments. Ready for training service — database access no longer blocked.
+- 2026-04-24 (session 7): Required actions completed — feature/mobile-auth was already clean; merged to master. Exercise library domain: Zod schemas (MuscleGroup, Equipment, Difficulty enums + Exercise + CRUD request/response schemas), 001_exercises.sql migration applied to Supabase (GIN array indexes, full-text search index, RLS defense-in-depth), services/training/ Hono service with health + exercise routes. turbo build 22/22 and lint 23/23 passing.
